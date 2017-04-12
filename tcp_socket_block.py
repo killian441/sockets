@@ -38,15 +38,14 @@ class TCPSocket(Block):
             msg += bytes([10])
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.IP_addr(),self.port()))
+        self.logger.debug('sending data {}'.format(msg))
         s.send(msg)
         if self.expect_response():
             response = s.recv(buffer_size)
+            try:
+                self.notify_signals([Signal({"response":response})])
+            except:
+                self.logger.exception(
+                    'Response is not valid: {}'.format(response))
         s.shutdown(2)
         s.close()
-        try:
-            self.notify_signals([Signal({"response":response})])
-        except:
-            self.logger.exception(
-                'Response is not valid: {}'.format(response))
-
-
